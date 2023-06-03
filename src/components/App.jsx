@@ -108,7 +108,18 @@ export class App extends Component {
           </Modal>
         )}
 
-        {loading && <ProgressBar />}
+        {loading && (
+          <div className={css.loader}>
+            <ProgressBar
+              height="100"
+              width="100"
+              ariaLabel="progress-bar-loading"
+              className={css.loaders}
+              borderColor="#000"
+              barColor="#51E5FF"
+            />
+          </div>
+        )}
 
         {!loading && hasMoreImages && (
           <LoadMoreBtn handleLoadMoreButton={this.handleLoadMoreButton} />

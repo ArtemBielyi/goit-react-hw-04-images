@@ -32,3 +32,12 @@ img {
   grid-gap: 16px;
   padding-bottom: 24px;
 }
+.loader {
+  position: fixed;
+
+  bottom: -30px;
+
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+}
