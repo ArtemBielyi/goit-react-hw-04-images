@@ -33,7 +33,7 @@ export const App = () => {
 
   const [error, setError] = useState(null);
 
-  const [noResults, setNoResults] = useState('');
+  // const [noResults, setNoResults] = useState('');
 
   const [showModal, setShowModal] = useState(false);
 
@@ -67,9 +67,9 @@ export const App = () => {
         if (hits.length === 0) {
           return toast.error(`no results with ${searchName} `);
         }
-        if (searchName === searchName) {
-          return;
-        }
+        // if (searchName === searchName) {
+        //   return;
+        // }
         // if (page === 1) {
         //   toast.success(`Hooray! We found ${totalHits} images.`);
         // }
@@ -99,6 +99,9 @@ export const App = () => {
   };
 
   const handleFormSubmit = searchName => {
+    // if (searchName === searchName) {
+    //   return;
+    // }
     setSearchName(searchName);
     setPage(1);
     setSearchResults([]);

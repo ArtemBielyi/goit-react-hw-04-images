@@ -8,6 +8,8 @@ export const Searchbar = ({ onSubmit }) => {
   // };
   const [searchName, setSearchName] = useState('');
 
+  const [prevSearchName, setPrevSearchName] = useState('');
+
   const handleChangeName = e => {
     setSearchName(e.currentTarget.value);
   };
@@ -19,14 +21,18 @@ export const Searchbar = ({ onSubmit }) => {
       toast('write a search query');
       return;
     }
-
+    if (searchName === prevSearchName) {
+      return;
+    }
     onSubmit(searchName);
     reset();
     // this.props.onSubmit(this.state.searchName);
     // this.setState({ searchName: '' });
   };
+
   const reset = () => {
     setSearchName('');
+    setPrevSearchName(searchName); // Сохраняем текущее значение searchName в prevSearchName
   };
 
   return (
