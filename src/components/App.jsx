@@ -31,9 +31,7 @@ export const App = () => {
 
   const [loading, setLoading] = useState(false);
 
-  const [error, setError] = useState(null);
-
-  // const [noResults, setNoResults] = useState('');
+  // const [error, setError] = useState(null);
 
   const [showModal, setShowModal] = useState(false);
 
@@ -49,9 +47,7 @@ export const App = () => {
     setLoading(true);
 
     getSearchImages(searchName, page, perPage)
-      .then(({ hits, totalHits }) => {
-        // const totalPages = Math.ceil(totalHits / perPage);
-
+      .then(({ hits }) => {
         const data = hits.map(({ id, webformatURL, largeImageURL, tags }) => {
           return {
             id,
@@ -62,7 +58,6 @@ export const App = () => {
         });
 
         setSearchResults(images => [...images, ...data]);
-        // setTotal(totalHits);
 
         if (hits.length === 0) {
           return toast.error(`no results with ${searchName} `);
@@ -70,15 +65,8 @@ export const App = () => {
         // if (searchName === searchName) {
         //   return;
         // }
-        // if (page === 1) {
-        //   toast.success(`Hooray! We found ${totalHits} images.`);
-        // }
-
-        // if (page === totalPages) {
-        //   toast.info("You've reached the end of search results.");
-        // }
       })
-      .catch(error => setError(error))
+
       .finally(() => setLoading(false));
   };
 
@@ -105,7 +93,7 @@ export const App = () => {
     setSearchName(searchName);
     setPage(1);
     setSearchResults([]);
-    setError(null);
+    // setError(null);
 
     // if (this.state.searchName === searchName) {
     //   return;
