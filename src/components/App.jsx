@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -11,120 +11,180 @@ import { LoadMoreBtn } from './Button/Button.jsx';
 import { getSearchImages } from './fetchApi.js';
 import { ProgressBar } from 'react-loader-spinner';
 
-export class App extends Component {
-  state = {
-    searchName: '',
-    page: 1,
-    searchResults: [],
-    loading: false,
-    error: false,
-    noResults: false,
-    showModal: false,
-    largeImageURL: null,
-  };
+export const App = () => {
+  // state = {
+  //   searchName: '',
+  //   page: 1,
+  //   searchResults: [],
+  //   loading: false,
+  //   error: false,
+  //   noResults: false,
+  //   showModal: false,
+  //   largeImageURL: null,
+  // };
 
-  componentDidUpdate(_, prevState) {
-    const { page } = this.state;
+  const [searchName, setSearchName] = useState('');
 
-    if (
-      prevState.searchName !== this.state.searchName ||
-      prevState.page !== page
-    ) {
-      this.fetchData();
-    }
-  }
+  const [page, setPage] = useState(1);
 
-  toggleModal = largeImageURL => {
-    this.setState(prevState => ({
-      showModal: !prevState.showModal,
-      largeImageURL: largeImageURL,
-    }));
-  };
+  const [searchResults, setSearchResults] = useState([]);
 
-  handleFormSubmit = searchName => {
-    if (this.state.searchName === searchName) {
-      return;
-    }
-    this.setState({ searchName, page: 1, searchResults: [] });
-  };
+  const [loading, setLoading] = useState(false);
 
-  handleLoadMoreButton = () => {
-    this.setState(({ page }) => ({
-      page: page + 1,
-      loading: true,
-    }));
-  };
+  const [error, setError] = useState(null);
 
-  fetchData = () => {
-    const { searchName, page } = this.state;
-    this.setState({ loading: true });
+  const [noResults, setNoResults] = useState('');
 
-    getSearchImages(searchName, page)
-      .then(data => {
-        if (data.hits.length === 0) {
-          toast('write a correct search query');
-          this.setState({ noResults: true });
-        } else {
-          const newHits = data.hits.map(
-            ({ id, webformatURL, largeImageURL }) => ({
-              id,
-              webformatURL,
-              largeImageURL,
-            })
-          );
+  const [showModal, setShowModal] = useState(false);
 
-          this.setState(prevState => ({
-            searchResults: [...prevState.searchResults, ...newHits],
-          }));
+  const [largeImageURL, setLargeImageURL] = useState(null);
+
+  useEffect(() => {
+    if (!searchName) return;
+    fetchImages(searchName, page);
+  }, [searchName, page]);
+
+  const fetchImages = (searchName, page) => {
+    const perPage = 12;
+    setLoading(true);
+
+    getSearchImages(searchName, page, perPage)
+      .then(({ hits, totalHits }) => {
+        // const totalPages = Math.ceil(totalHits / perPage);
+
+        const data = hits.map(({ id, webformatURL, largeImageURL, tags }) => {
+          return {
+            id,
+            webformatURL,
+            largeImageURL,
+            tags,
+          };
+        });
+
+        setSearchResults(images => [...images, ...data]);
+        // setTotal(totalHits);
+
+        if (hits.length === 0) {
+          return toast.error(`no results with ${searchName} `);
         }
+        if (searchName === searchName) {
+          return;
+        }
+        // if (page === 1) {
+        //   toast.success(`Hooray! We found ${totalHits} images.`);
+        // }
+
+        // if (page === totalPages) {
+        //   toast.info("You've reached the end of search results.");
+        // }
       })
-      .catch(error => this.setState({ error, searchResults: [] }))
-      .finally(() => {
-        this.setState({ loading: false, noResults: false });
-      });
+      .catch(error => setError(error))
+      .finally(() => setLoading(false));
   };
 
-  render() {
-    const { searchResults, loading, page, showModal, largeImageURL, tags } =
-      this.state;
+  // componentDidUpdate(_, prevState) {
+  //   const { page } = this.state;
 
-    const hasMoreImages =
-      searchResults.length > 0 && page * 10 <= searchResults.length;
+  //   if (
+  //     prevState.searchName !== this.state.searchName ||
+  //     prevState.page !== page
+  //   ) {
+  //     this.fetchData();
+  //   }
+  // }
 
-    return (
-      <div className={css.App}>
-        <ToastContainer autoClose={2000} />
+  const toggleModal = largeImageURL => {
+    setShowModal(!showModal);
+    setLargeImageURL(largeImageURL);
+  };
 
-        <Searchbar onSubmit={this.handleFormSubmit} />
+  const handleFormSubmit = searchName => {
+    setSearchName(searchName);
+    setPage(1);
+    setSearchResults([]);
+    setError(null);
 
-        <ImageGallery
-          searchResults={searchResults}
-          onClick={this.toggleModal}
-        />
+    // if (this.state.searchName === searchName) {
+    //   return;
+    // }
+    // this.setState({ searchName, page: 1, searchResults: [] });
+  };
 
-        {showModal && (
-          <Modal onClose={this.toggleModal}>
-            <img src={largeImageURL} alt={tags} />
-          </Modal>
-        )}
+  const handleLoadMoreButton = () => {
+    setPage(page => page + 1);
+  };
+  // const handleLoadMoreButton = () => {
+  //   this.setState(({ page }) => ({
+  //     page: page + 1,
+  //     loading: true,
+  //   }));
+  // };
 
-        {loading && (
-          <div className={css.loader}>
-            <ProgressBar
-              height="100"
-              width="100"
-              ariaLabel="progress-bar-loading"
-              className={css.loaders}
-              borderColor="#000"
-              barColor="#51E5FF"
-            />
-          </div>
-        )}
+  // const fetchData = (searchName, page) => {
+  //   // const { searchName, page } = this.state;
+  //   setLoading(true);
 
-        {!loading && hasMoreImages && (
-          <LoadMoreBtn handleLoadMoreButton={this.handleLoadMoreButton} />
-        )}
-      </div>
-    );
-  }
-}
+  //   getSearchImages(searchName, page)
+  //     .then(data => {
+  //       if (data.hits.length === 0) {
+  //         toast('write a correct search query');
+  //         this.setState({ noResults: true });
+  //       } else {
+  //         const newHits = data.hits.map(
+  //           ({ id, webformatURL, largeImageURL }) => ({
+  //             id,
+  //             webformatURL,
+  //             largeImageURL,
+  //           })
+  //         );
+
+  //         this.setState(prevState => ({
+  //           searchResults: [...prevState.searchResults, ...newHits],
+  //         }));
+  //       }
+  //     })
+  //     .catch(error => this.setState({ error, searchResults: [] }))
+  //     .finally(() => {
+  //       this.setState({ loading: false, noResults: false });
+  //     });
+  // };
+
+  // const { searchResults, loading, page, showModal, largeImageURL, tags } =
+  //   this.state;
+
+  const hasMoreImages =
+    searchResults.length > 0 && page * 10 <= searchResults.length;
+
+  return (
+    <div className={css.App}>
+      <ToastContainer autoClose={2000} />
+
+      <Searchbar onSubmit={handleFormSubmit} />
+
+      <ImageGallery searchResults={searchResults} onClick={toggleModal} />
+
+      {showModal && (
+        <Modal onClose={toggleModal}>
+          <img src={largeImageURL} alt="" />
+        </Modal>
+      )}
+
+      {loading && (
+        <div className={css.loader}>
+          <ProgressBar
+            height="100"
+            width="100"
+            ariaLabel="progress-bar-loading"
+            className={css.loaders}
+            borderColor="#000"
+            barColor="#51E5FF"
+          />
+        </div>
+      )}
+
+      {!loading && hasMoreImages && (
+        <LoadMoreBtn handleLoadMoreButton={handleLoadMoreButton} />
+      )}
+    </div>
+  );
+};
