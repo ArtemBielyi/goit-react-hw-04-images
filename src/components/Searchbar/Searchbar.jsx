@@ -3,9 +3,6 @@ import { toast } from 'react-toastify';
 import css from './Searchbar.module.css';
 
 export const Searchbar = ({ onSubmit }) => {
-  // state = {
-  //   searchName: '',
-  // };
   const [searchName, setSearchName] = useState('');
 
   const [prevSearchName, setPrevSearchName] = useState('');
@@ -26,13 +23,11 @@ export const Searchbar = ({ onSubmit }) => {
     }
     onSubmit(searchName);
     reset();
-    // this.props.onSubmit(this.state.searchName);
-    // this.setState({ searchName: '' });
   };
 
   const reset = () => {
     setSearchName('');
-    setPrevSearchName(searchName); // Сохраняем текущее значение searchName в prevSearchName
+    setPrevSearchName(searchName);
   };
 
   return (
